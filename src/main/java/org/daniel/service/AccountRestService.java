@@ -47,12 +47,13 @@ public class AccountRestService {
     @Path("/{id}")
     @Consumes(MediaType.APPLICATION_JSON_PATCH_JSON)
     @Produces(MediaType.APPLICATION_JSON)
-    public Response patchAccount(JsonPatch patch, @PathParam("id") long accountId) {
+    public Response patchAccount(JsonPatch patch, @PathParam("id") long accountId) throws JsonProcessingException {
         Optional<Account> beforePatchOpt = accountRepository.lookup(accountId);
         if (!beforePatchOpt.isPresent()) {
             return Response.status(Response.Status.NOT_FOUND).build();
         }
         Account beforePatch = beforePatchOpt.get();
+
         try {
             JsonNode beforePatchNode = objectMapper.valueToTree(beforePatch);
             JsonNode afterPatchNode = patch.apply(beforePatchNode);
@@ -62,10 +63,11 @@ public class AccountRestService {
             }
             accountRepository.update(afterPatch);
             return Response.status(Response.Status.OK).entity(afterPatch).build();
-        } catch (JsonPatchException | JsonProcessingException e) { // it means patch request was invalid
-            return Response.status(Response.Status.BAD_REQUEST).entity("Invalid Patch request: " + e.getMessage()).build();
+        } catch (JsonPatchException e) {
+            // this exception means that a 'test' operation of patch evaluated to false
+            // it is not an error, but the object remains unchanged
+            return Response.status(Response.Status.CONFLICT).entity(beforePatch).build();
         }
-
     }
 
     @GET

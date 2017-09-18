@@ -9,6 +9,9 @@ import javax.ws.rs.ApplicationPath;
 @ApplicationPath("api")
 public class ApplicationConfig extends ResourceConfig {
     public ApplicationConfig() {
+
+        // Register resource class (only one) and exception handler
+        // JSON provider is registered directly from 3rd party-package (Jackson)
         packages(getClass().getPackage().getName(), "com.fasterxml.jackson.jaxrs.json");
 
         register(new AbstractBinder() {
