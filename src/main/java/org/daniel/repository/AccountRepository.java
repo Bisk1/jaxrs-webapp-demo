@@ -3,12 +3,11 @@ package org.daniel.repository;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import org.daniel.model.Account;
 
-import javax.annotation.PreDestroy;
-import javax.inject.Named;
 import javax.inject.Singleton;
 import java.io.File;
 import java.io.IOException;
-import java.util.*;
+import java.util.Collection;
+import java.util.Optional;
 
 @Singleton
 public class AccountRepository {

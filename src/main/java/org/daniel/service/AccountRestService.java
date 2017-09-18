@@ -5,7 +5,6 @@ import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.github.fge.jsonpatch.JsonPatch;
 import com.github.fge.jsonpatch.JsonPatchException;
-import com.sun.net.httpserver.Headers;
 import org.daniel.model.Account;
 import org.daniel.repository.AccountRepository;
 
@@ -15,7 +14,9 @@ import javax.ws.rs.core.HttpHeaders;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
 import java.util.Collection;
+import java.util.List;
 import java.util.Optional;
+import java.util.stream.Collectors;
 
 @Path("/v1/accounts/account")
 public class AccountRestService {
@@ -78,8 +79,13 @@ public class AccountRestService {
     @GET
     @Produces(MediaType.APPLICATION_JSON)
     public Response getAll() {
-        Collection<Account> result = accountRepository.getAll();
-        return Response.status(Response.Status.OK).entity(result).build();
+        Collection<Account> allAccounts = accountRepository.getAll();
+
+        List<String> allNames = allAccounts.stream()
+                .map(Account::getName)
+                .collect(Collectors.toList());
+        System.out.println("Getting all the accounts, names: " + String.join(", ", allNames));
+        return Response.status(Response.Status.OK).entity(allAccounts).build();
     }
 
     public void setAccountRepository(AccountRepository accountRepository) {
