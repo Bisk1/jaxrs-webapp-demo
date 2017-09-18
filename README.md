@@ -1,4 +1,4 @@
-###JAX-RS web app demo
+### JAX-RS web app demo
 
 To run:
 1) `mvn jetty:run` starts standalone Jetty server with app on localhost:8080
@@ -88,6 +88,45 @@ Response: `200 OK`
     "money": 245.88
 }
 ~~~~
+
+
+3. Try to modify account with `test` patch operation which evaluates to false
+
+ PATCH `localhost:8080/api/v1/accounts/account/2`
+
+- `Content-Type`: `application/json-patch+json`
+- `Accept`: `application/json`
+
+~~~~
+[
+	{
+		"op": "replace",
+		"path": "/name",
+		"value": "Alex"
+	},
+	{
+		"op": "test",
+		"path": "/currency",
+		"value": "USD"
+	},
+	{
+		"op": "replace",
+		"path": "/money",
+		"value": 245.88
+	}
+]
+~~~~
+
+Response: `409 Conflict`
+~~~~
+{
+    "id": 2,
+    "name": "Ania",
+    "currency": "AUD",
+    "money": 3000
+}
+~~~~
+
 
 4. Query all existing accounts
 

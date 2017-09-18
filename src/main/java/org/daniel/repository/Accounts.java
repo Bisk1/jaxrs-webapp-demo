@@ -8,10 +8,18 @@ import java.util.Map;
 // This is a wrapper for Account database for easier access and storage
 public class Accounts {
 
+    private long nextId = 1;
+
     // database is represented as an in-memory hashmap
     private Map<Long, Account> map = new HashMap<>();
 
-    public void put(long id, Account account) {
+    public void generateIdAndSave(Account account) {
+        long id = getNextId();
+        account.setId(id);
+        map.put(id, account);
+    }
+
+    public void save(long id, Account account) {
         map.put(id, account);
     }
 
@@ -26,4 +34,10 @@ public class Accounts {
     public Map<Long, Account> getMap() {
         return map;
     }
+
+
+    private long getNextId() {
+        return nextId++;
+    }
+
 }
