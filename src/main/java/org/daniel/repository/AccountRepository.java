@@ -29,31 +29,38 @@ public class AccountRepository {
     }
 
     public Account create(Account account) {
-        accounts.generateIdAndSave(account);
+        Account created = accounts.generateIdAndSave(account);
         saveDatabase();
-        return account;
+        return created;
     }
 
     public Account update(Account account) {
-        accounts.save(account.getId(), account);
+        accounts.save(account);
         saveDatabase();
         return account;
     }
 
     private void readDatabase() {
-        try {
-            accounts = dataFile.exists() ? objectMapper.readValue(dataFile, Accounts.class) : new Accounts();
-        } catch (IOException e) {
-            throw new RuntimeException(e);
-        }
+        withIOExceptionWrapper(
+                () -> accounts = dataFile.exists() ? objectMapper.readValue(dataFile, Accounts.class) : new Accounts()
+        );
     }
 
     private void saveDatabase() {
+        withIOExceptionWrapper(
+                () -> objectMapper.writeValue(dataFile, accounts)
+        );
+    }
+
+    private void withIOExceptionWrapper(MyRunnable runnable) {
         try {
-            objectMapper.writeValue(dataFile, accounts);
+            runnable.run();
         } catch (IOException e) {
             throw new RuntimeException(e);
         }
     }
 
+    private interface MyRunnable {
+        void run() throws IOException;
+    }
 }

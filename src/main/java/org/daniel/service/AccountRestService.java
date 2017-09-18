@@ -5,11 +5,13 @@ import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.github.fge.jsonpatch.JsonPatch;
 import com.github.fge.jsonpatch.JsonPatchException;
+import com.sun.net.httpserver.Headers;
 import org.daniel.model.Account;
 import org.daniel.repository.AccountRepository;
 
 import javax.inject.Inject;
 import javax.ws.rs.*;
+import javax.ws.rs.core.HttpHeaders;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
 import java.util.Collection;
@@ -58,11 +60,14 @@ public class AccountRestService {
             JsonNode beforePatchNode = objectMapper.valueToTree(beforePatch);
             JsonNode afterPatchNode = patch.apply(beforePatchNode);
             Account afterPatch = objectMapper.treeToValue(afterPatchNode, Account.class);
-            if (beforePatch.getId() != afterPatch.getId()) { // forbidden to modify id
-                return Response.status(Response.Status.BAD_REQUEST).entity("Id cannot be modified").build();
+            if (!beforePatch.getId().equals(afterPatch.getId())) { // forbidden to modify id
+                return Response.status(Response.Status.BAD_REQUEST)
+                        .entity("Id cannot be modified")
+                        .header(HttpHeaders.CONTENT_TYPE, MediaType.TEXT_PLAIN)
+                        .build();
             }
-            accountRepository.update(afterPatch);
-            return Response.status(Response.Status.OK).entity(afterPatch).build();
+            Account updated = accountRepository.update(afterPatch);
+            return Response.status(Response.Status.OK).entity(updated).build();
         } catch (JsonPatchException e) {
             // this exception means that a 'test' operation of patch evaluated to false
             // it is not an error, but the object remains unchanged
